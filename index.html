@@ -6,7 +6,7 @@
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <style>
-        
+        .field-container{margin: 25px auto;}
     </style>
 </head>
 <body>
@@ -16,13 +16,13 @@
             <div class="contact-form"> 
                 <form action="#" class="form-inline" role="form">
                     <div class="form-group">
-                        <input type="text" class="form-control" name="txtBase" id="txtBase" autoload placeholder="No. Piezas Base">
+                        <input type="text" class="form-control" name="txtBase" value="10" id="txtBase" autoload placeholder="No. Piezas Base">
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" name="txtAltura" id="txtAltura" placeholder="No. Piezas Altura">
+                        <input type="text" class="form-control" name="txtAltura" value="10" id="txtAltura" placeholder="No. Piezas Altura">
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" name="txtMinas" id="txtMinas" placeholder="No. Minas">
+                        <input type="text" class="form-control" name="txtMinas" value="10" id="txtMinas" placeholder="No. Minas">
                     </div>
                     <div class="form-group">
                         <button type="button" name="btnAction" id="btnAction" class="btn btn-primary">Iniciar</button>
@@ -30,10 +30,14 @@
                 </form>
             </div>
         </div>
+        <div class="col-lg-12 col-md-10" id="grid-container" style="text-align:center;">
+            <div class="field-container"></div>
+        </div>
     </section>
 
     <script>
     var banInit = false;
+    Mines  = new Array();
     $(function(){
         $('.form-inline input').keyup(function(event) {
             this.value = this.value.replace(/[^0-9\.]/g,'');
@@ -46,7 +50,9 @@
                 if (($('input#txtBase').val() != '') && ($('input#txtAltura').val() != '') && $('input#txtMinas').val() != '') {
                     banInit = true;
                     $(this).removeClass('btn-primary').addClass('btn-warning').text('Reiniciar');
-                    arrMines = setMines();
+                    setMines();
+                    //console.log(Mines);
+                    printGrid(Mines);
                 }else{
                     console.log('Show Alert all fields required');
                 }
@@ -59,7 +65,7 @@
     });
 
     function setMines(){
-        var Mines  = new Array();
+        //var Mines  = new Array();
         tFields = $('input#txtBase').val() * $('input#txtAltura').val();
         for (i = 0; i < tFields; i++) {
             tArray = new Array();
@@ -72,7 +78,54 @@
             Mines.push(tArray);
         };
         Mines = $.randomize(Mines);
-        console.log(Mines);
+        //console.log(Mines);
+        setProximity();
+        //return Mines;
+    }
+
+    function printGrid(arr){
+        $.each(arr, function(index, val) {
+             /* iterate through array or object */
+            o = val;
+            bomb = o[0];
+            prox = o[1];
+            //34 * 34
+            if(bomb == 1){
+                da = '*';
+            }else{
+                da = prox;
+            }
+            html = '<div class="btn btn-default active" data-bomb="'+ bomb +'" data-prox="'+ prox +'">'+ da +'</div>';
+            $('div.field-container').append(html);
+        });
+        h = 34 * $('input#txtAltura').val();
+        w = 34 * $('input#txtBase').val()
+        $('div.field-container').css({
+            heigth: h + 'px',
+            width: w + 'px'
+        });
+    }
+
+    function setProximity(){
+        //console.log(Mines);
+        $.each(Mines, function(index, val) {
+             //before and after
+             before = index - 1;
+             if(before >= 0){
+                markMine(before, 'before');
+             }
+             after = index + 1;
+             if(after < Mines.length){
+                markMine(after, 'after');
+             }
+        });
+    }
+
+    function markMine(pos, te){
+        if(Mines[pos][0] == 1){
+            Mines[pos][1]++;
+            alert(te +' pos: ' + pos + ' valor: ' +Mines[pos][1]);
+        }
     }
 
 
